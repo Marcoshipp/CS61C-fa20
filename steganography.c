@@ -7,27 +7,42 @@
 ** AUTHOR:      Dan Garcia  -  University of California at Berkeley
 **              Copyright (C) Dan Garcia, 2020. All rights reserved.
 **				Justin Yokota - Starter Code
-**				YOUR NAME HERE
+**				Marco Osaomagbon
 **
 ** DATE:        2020-08-23
 **
 **************************************************************************/
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
 #include "imageloader.h"
 
 //Determines what color the cell at the given row/col should be. This should not affect Image, and should allocate space for a new Color.
-Color *evaluateOnePixel(Image *image, int row, int col)
-{
-	//YOUR CODE HERE
+Color *evaluateOnePixel(Image *image, int row, int col) {
+	Color* c = malloc(sizeof(Color));
+	if (image->image[row][col].B % 2 == 0) {
+		c->R = 0, c->G = 0, c->B = 0;
+	} else {
+		c->R = 255, c->G = 255, c->B = 255;
+	}
+	return c;
 }
 
 //Given an image, creates a new image extracting the LSB of the B channel.
 Image *steganography(Image *image)
 {
-	//YOUR CODE HERE
+	Image* newImg = malloc(sizeof(Image));
+	newImg->image = calloc(image->rows, sizeof(Color*));
+	int rows = image->rows, cols = image->cols;
+	newImg->rows = rows, newImg->cols = cols;
+	for (int i = 0; i < rows; i++) {
+		newImg->image[i] = calloc(cols, sizeof(Color));
+		for (int j = 0; j < cols; j++) {
+			Color* c = evaluateOnePixel(image, i, j);
+			newImg->image[i][j] = *c;
+			free(c);
+		}
+	}
+	return newImg;
 }
 
 /*
@@ -43,7 +58,11 @@ If the input is not correct, a malloc fails, or any other error occurs, you shou
 Otherwise, you should return from main with code 0.
 Make sure to free all memory before returning!
 */
-int main(int argc, char **argv)
-{
-	//YOUR CODE HERE
+int main(int argc, char **argv) {
+	if (argc != 2) exit(-1);
+	Image* img = readData(argv[1]);
+	Image* decodedImg = steganography(img);
+	writeData(decodedImg);
+	freeImage(img), freeImage(decodedImg);
+	return 0;
 }
